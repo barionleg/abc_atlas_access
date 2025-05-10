@@ -1,0 +1,846 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=10"/>
+  <meta http-equiv="content-type" content="text/html;charset=UTF-8"/>
+  <meta name="description" content="@description"/>
+  <meta name="keywords" content="@keywords"/>
+  <meta name="version" content="108"/>
+  <title>Interactive Atlas Viewer :: Atlas Viewer</title>
+  <script>
+      if (typeof window.JSON === 'undefined') {
+          document.write("<script src='assets/aiclient/vendor/history/json2.js'><\/script>");
+      }
+
+      var _pSupressBrowserFlashWarning = true;
+  </script>
+  <link href="https://atlas.brain-map.org/assets/jquery-ui-1.8.10.custom.css" media="screen" rel="stylesheet" type="text/css" />
+  <link href="https://atlas.brain-map.org/assets/aiclient/manifests/viewer_manifest.css" media="screen" rel="stylesheet" type="text/css" />
+  <link href="https://atlas.brain-map.org/assets/aiclient/viewer/common_manifest.css.scss" media="screen" rel="stylesheet" type="text/css" />
+  <link href="https://atlas.brain-map.org/assets/jquery-ui.theme.smoothness.1.10.3.css" media="screen" rel="stylesheet" type="text/css" />
+
+  <script src="https://atlas.brain-map.org/assets/manifests/viewer_manifest.js" type="text/javascript"></script>
+  <script src="//www.brain-map.org/external_assets/javascripts/portal.js" type="text/javascript"></script>
+
+</head>
+<body>
+
+
+<style>
+    html {
+        height:100%;
+        width:100%;
+        margin:0px;
+        padding:0px;
+    }
+
+    body {
+        height:100%;
+        width:100%;
+        margin:0px;
+        padding:0px;
+        overflow:auto;
+    }
+
+
+
+.page_container {
+    position:absolute;
+	top:0px;
+	left:0px;
+	right:0px;
+	bottom:0px;
+	border: 1px solid #fff;
+}
+
+.split_window_container {
+	height: 100%;
+	width: 100%;
+	border: 0px solid #00F;
+}
+
+._ontology_outer_container {
+    border:0px solid #f00;
+    height:100%;
+    width:100%;
+    color:#666;
+    font: 0.9em Tahoma,arial, sans-serif;
+    display:block;
+}
+
+._ontology_search_container {
+
+    border:0px solid #0f0;
+    height:40px;
+    width:96%;
+    margin:auto;
+}
+
+._ontology_search_container input {
+    border:1px solid #ccc;
+    position:absolute;
+    height:1.4em;
+    top:8px;
+    right:8px;
+    left:8px;
+    margin:auto;
+    color:#999;
+    width:96%
+}
+
+._ontology_inner_container {
+    position:absolute;
+    top:120px;
+    left:6px;
+    bottom:0px;
+    right:0px;
+    border:0px solid #00f;
+    overflow:auto;
+}
+
+._ontology_level_container {
+
+    border:0px solid #f00;
+    margin:auto;
+    width:96%;
+}
+
+.level_label {
+
+    border:1px solid #ccc;
+    padding:2px;
+    font-weight:bold;
+    font-size:1em !important;
+    width:16px;
+    margin:3px;
+    display:inline-block;
+    cursor:pointer;
+    text-align:center;
+    background-color:#fff;
+}
+
+.level_label_help {
+
+    border:1px solid #ccc;
+    padding:2px;
+    font-weight:bold;
+    font-size:1em !important;
+    width:16px;
+    margin:3px;
+    display:inline-block;
+    cursor:pointer;
+    text-align:center;
+    background-color:#506bf1;
+    color:#fff;
+}
+
+.level_label:hover {
+    background-color:#ddd;
+}
+
+.level_label_help:hover {
+    background-color:#00f;
+}
+
+.level_label_selected {
+    background-color:#ddd;
+    border:1px solid #f00;
+}
+
+.annotated {
+    color:#000 !important;
+}
+
+.partially_annotated {
+    color:#777 !important;
+}
+
+.not_annotated {
+    color:#ccc !important;
+    font-style:italic !important;
+}
+
+.jstree-clicked {
+    color:#fff !important;
+}
+
+.brightfield {
+    color:#444;
+}
+
+/*  styles for showing/hiding floaters */
+._floating_pane {
+    background:rgba(0,0,0,0.55);
+    border:0px solid #000;
+    position:absolute;
+    z-index:15;
+    color:#000;
+    background:transparent;
+}
+
+._floating_pane:hover {
+    background:rgba(0,0,0,0.05);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#10000000, endColorstr=#10000000)";
+    color:#000;
+}
+
+._floating_pane_handle {
+    width:100%;
+    min-height:1em;
+    border:0px solid #f00;
+    cursor:move;
+    text-align:left;
+    font-size:1.4em;
+    font-weight:bold;
+}
+
+
+._floating_pane_content {
+    background:rgba(255,255,255,0.3);
+    width:100%;
+    border:0px solid #00f;
+}
+
+._floating_pane_closer {
+    height:12px;
+    width:12px;
+    border: 0px solid #666;
+    float:right;
+    margin-right:4px;
+    opacity:0.0 !important;
+    display:none;
+}
+
+div._floating_pane_closer:hover {
+    opacity:1.0 !important;
+}
+/* end floater styles */
+
+/*  the rectangle that flies from a floater to the config button when the floater is closed */
+.ui-effects-transfer {
+    border: 2px dotted #000;
+    z-index:15;
+}
+
+
+.ui-menu {
+
+    width: 200px;
+    box-shadow: 4px 3px 5px 0px rgba(119, 119, 119, 0.75);
+    -moz-box-shadow: 4px 3px 5px 0px rgba(119, 119, 119, 0.75);
+    -webkit-box-shadow: 4px 3px 5px 0px rgba(119, 119, 119, 0.75);
+    z-index:100;
+}
+
+
+.selectmenu .ui-state-focus {
+
+    border: 1px solid transparent;
+    background: none !important;
+    background-color: #ededfe !important;
+}
+
+.selectmenu a {
+
+    font-size: 0.78em;
+    color: #666;
+}
+
+.menu_group {
+
+    font-size: 0.78em;
+    font-weight: bold;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-left: 6px;
+    margin-top: 8px;
+}
+
+._config_group_hidden {
+
+    display: none;
+}
+
+.minicolors-swatch {
+
+    margin-left: -20px;
+    width: 16px;
+    height: 16px;
+}
+
+.selectator {
+
+    position:relative;
+    width: 200px;
+    text-align: left;
+    background: none !important;
+    background-color: #f7f7f7 !important;
+}
+
+.selectator:hover {
+
+    -moz-box-shadow: 0 0 3px #aaa;
+    -webkit-box-shadow: 0 0 3px #aaa;
+    box-shadow: 0 0 3px #aaa;
+}
+
+/* the menu button */
+.config_menu_button {
+
+    width: 20px;
+    height: 20px;
+    background:none !important;
+    background-image: url(/assets/list_icon.png) !important;
+    background-color: #f7f7f7 !important;
+}
+
+
+.simstripImgSel {
+
+    border:1px solid #00f !important;
+}
+
+/** svg container styles */
+
+
+
+#the_svg_wrapper {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    border:1px #00f;
+    z-index:10;
+}
+
+path {
+
+    cursor:pointer;
+}
+
+#version_warning_container {
+
+    z-index:10 !important;
+    position:absolute !important;
+    top:40px !important;
+
+    left:auto !important;
+    right:180px !important;
+
+    width:340px !important;
+
+}
+
+</style>
+
+
+<div id='page_container' class='page_container'></div>
+<div id="download_dialog_container"></div>
+
+
+<script>
+
+    var _pTabId;
+
+    
+  var _application = null;
+
+  function app_start(callback, options) {
+    var app_options = {
+        theme:'', // should be overridden by options merge
+
+        urls:{
+            data_service:'/api/v2/data/',
+            analysis_service:'/mouse/data/',
+            image_service:"/cgi-bin/imageservice",
+            viewer_image_service:"/cgi-bin/imageservice",
+            tile_service:"/tiles/",
+            info_service:"/tiles/",
+            external_assets:"//www.brain-map.org/external_assets",
+            level_help_url:"//help.brain-map.org/display/atlasviewer/Allen+Developing+Mouse+Brain+Atlas#AllenDevelopingMouseBrainAtlas-StructureOntology"
+        },
+        on_ready:callback
+    };
+    $j.extend(true, app_options, options);
+    _application = new application(app_options);
+  }
+
+  function inspect(prefix, obj) {
+      var s = "";
+      for(key in obj) {
+          if((typeof obj[key]) == "function")
+              s = s;
+          else if((typeof obj[key]) == "object" && obj[key] !== null & key != "element")
+              s += "\n" + prefix + "key: " + key + inspect(prefix + "    ", obj[key]);
+          else
+              s += "\n" + prefix + "key: " + key + ",   value: " + obj[key];
+      }
+      return(s);
+  }
+
+  function trace(msg) {
+      if(window.console)  {
+          window.console.log(msg);
+          console.trace();
+      }
+  }
+
+
+
+
+    // create the History namespace; we're not including the
+    // History plugin because it conflicts with the other-than-standard
+    // way that the LB URLs are updated.
+    var History = {};
+    var state_manager = new atlasviewer_state_translator();
+    var _app_mode = 'atlas';
+    var _controller = null;
+    var _description_window = null;
+    var _page = null;
+    var _page_config = null;
+    var _user_config = null;
+
+
+    function load_page(app) {
+
+        var page_container = $j('#page_container');
+        _page = new app_page(page_container, 'viewer', app, {});
+
+        // override the normal url state bashing to be compatible with old legend browser URLs.
+        _page.get_state = state_manager.get_state;
+        _page.set_state = state_manager.set_state;
+        // attaching an event dispatcher to the page object.
+        _page.dispatcher = new event_dispatcher();
+        _page.dispatcher.add_listener('config_menu.select', do_config_event);
+
+        _page_config = _page.get_config();
+        _user_config = new user_data(_page_config.user_config);
+
+        var _component_configs = _page_config.components;
+        var atlas_options = {
+
+            window_options:{
+
+                horizontal:(_component_configs.image_strip !== undefined),
+                vertical:(_component_configs.ontology !== undefined),
+                default_left_size:(_component_configs.ontology ? _component_configs.ontology.width ? _component_configs.ontology.width : 300 : 0),
+                default_bottom_size:(_component_configs.image_strip ? _component_configs.image_strip.height ? _component_configs.image_strip.height : 200 : 0),
+                persist_changes:true
+            },
+            delegates:{
+
+                tool_factory:build_tools
+            },
+            on_ready:do_atlas_ready
+        };
+
+        _controller = new atlas_viewer_controller(page_container, _page, atlas_options);
+    }
+
+    $j(window).bind('load', function() {
+
+        app_start(load_page, {theme:_app_mode});
+    });
+
+    $j(window).bind('resize', function(e, size) {
+
+         if(e.target != window)
+            return;
+
+        $j('#page_container').trigger("resize");
+    });
+
+    function do_atlas_ready() {
+
+       if(_description_window) {
+
+            var controls = _user_config.get("controls");
+           _description_window.show(controls.show_atlas_description);
+       }
+
+        // focus is set to the zapviewer window whenever the mouse is moved over it.  The focused viewer
+        // will respond to keyboard shortcuts.
+        $j('#page_container_right_pane').bind('mouseover', function() { set_input_focus(_controller);});
+
+        // make sure the scalebar has been updated properly
+        setTimeout(fix_resolution, 250);
+    }
+
+    function fix_resolution() {
+
+        var info = _controller.get_image_set().get_image_info();
+        _page.dispatcher.trigger('image_set.image_zoom', [info.image, info.image]);
+    }
+
+    function set_input_focus(viewer) {
+
+        viewer.focus();
+    }
+
+    function build_tools(name, config, container) {
+
+        var tool = null;
+        // is this a tool we care about?
+        switch(name) {
+
+            case 'atlas_description':
+                var atlas = _controller.get_atlas();
+                config.title = atlas[config.description_field];
+                _description_window = new atlas_description_widget(container, config);
+                tool = _description_window;
+                break;
+           case 'select_image_type':
+                config.data = _controller.get_image_types();
+                tool = build_image_type_selector(config);
+                break;
+            case 'select_atlas':
+                config.data = _controller.get_atlases();
+                tool = build_atlas_selector(container, config);
+                break;
+            default:
+                ;
+        }
+
+        return(tool);
+    }
+
+
+    function build_image_type_selector(tool) {
+
+        var atlas_id = _controller.get_atlas().id;
+        tool.html_id =  tool.id;
+        var html = '<div id="' + tool.html_id + '" tool_id="' + tool.id + '"';
+
+        var class_names = ' class="tool_dock_tool selectator';
+        if (tool.style && tool.style == 'toggle')
+            class_names += tool.active ? ' dock_toggle dock_toggle_active"' : ' dock_toggle"';
+        else
+            class_names += '"';
+
+        html += class_names;
+
+        if (tool.title)
+            html += ' title="' + tool.title + '"';
+
+        if (!tool.enabled)
+            html += ' disabled';
+
+        html += '></div>';
+
+        // create the right labels for the different image types...
+        var ordered_tools = [];
+        for(var key in tool.data) {
+
+            var config = tool.data[key];
+
+            var is_atlas = (config.label.indexOf('Atlas') >= 0);
+            var label_mapping = _page_config.atlas_labels[atlas_id];
+
+            // if the mapping for a given label has been explicitly set to false, don't show the label at all.
+            // This bit of double negativity is specifically for the Human Neuroanatomical Guide,
+            // for which a Nissl exists, but shouldn't be shown.
+            if(!(label_mapping && label_mapping[config.label] != undefined && !label_mapping[config.label])) {
+
+                if(label_mapping) {
+
+                    config.new_label = label_mapping ? label_mapping[config.label].label : (is_atlas ? 'Atlas' : 'Nissl');
+                    config.index = label_mapping[config.label].index;
+                } else {
+
+                    var alternate = atlas_id == 602630314 ? 'Average Template' : 'Nissl'
+                    config.new_label = is_atlas ? 'Atlas' : alternate;
+                    config.index = 0;
+                }
+                ordered_tools.push(config);
+            }
+        }
+
+        // order the image types by the explicit index...
+        ordered_tools.sort(function(a,b) { return( (a.index < b.index) ? -1 : 1); } )
+
+        // this is the scaffold for select list data.  We are going to fill in the items[] array.
+        var type_list = {
+
+            id:"image_type_list",
+            data:[
+                {
+                    id:"alternate_atlases",
+                    label:"Alternative Background Images",
+                    hide_group_label: false,
+                    items:[]
+                }
+            ]
+        };
+
+        // fill in the data items with the ordered labels
+        for(var i = 0; i < ordered_tools.length; i++) {
+
+            var is_selected = (ordered_tools[i].new_label == 'Atlas');
+            var new_item = {
+                id:ordered_tools[i].label,
+                label:ordered_tools[i].new_label,
+                active:is_selected
+            };
+            type_list.data[0].items.push(new_item);
+        }
+
+        // This tool is created before its container.  We attach it to the document here,
+        // and later when the tool_dock is creating containers it will see that this tool
+        // has no tool.html, but does have a tool.tool_dom_id, and it will be moved into the correct
+        // tool_dock container.
+        $j(html).appendTo($j(document.body));
+        var select_container = $j('#'+tool.html_id);
+        var atlas_selector = new select_menu_widget($j(document.body), select_container, type_list, {
+            mode: "singleselect",
+            on_select:function(transition, item) {
+
+                 var tool = {
+                    id:'select_image_type',
+                    tool_id:'select_image_type',
+                    selectedIndex:0,
+                    options:[
+                        {id:item.id}
+                    ]
+                };
+                // There are several layers of the app that listen for the select_image_type
+                // event and take some action on it.  Rather than refactoring all of that now,
+                // I'm just going to simulate the already-registered image_set.tool_click
+                // event, and provide a mock <option> object, complete with selectedIndex property.
+                _page.dispatcher.trigger('image_set.tool_click', [tool.tool_id, tool]);
+            }
+        });
+
+        tool.html = null;
+        tool.type = "custom";
+        tool.tool_dom_id = tool.html_id;
+
+        return(tool);
+    }
+
+    function build_atlas_selector(container, tool) {
+
+        var atlas_groups = _page_config.atlas_groups;
+
+        var atlas_id = _controller.get_atlas().id;
+        tool.html_id =  tool.id;
+        var html = '<div id="' + tool.html_id + '" tool_id="' + tool.id + '"';
+
+        var class_names = ' class="tool_dock_tool selectator';
+        if (tool.style && tool.style == 'toggle')
+            class_names += tool.active ? ' dock_toggle dock_toggle_active"' : ' dock_toggle"';
+        else
+            class_names += '"';
+
+        html += class_names;
+
+        if (tool.title)
+            html += ' title="' + tool.title + '"';
+
+        if (!tool.enabled)
+            html += ' disabled';
+
+        html += '></div>';
+
+        $j(html).appendTo($j(document.body));
+        var select_container = $j('#'+tool.html_id);
+        var atlas_selector = new select_menu_widget($j(document.body), select_container, atlas_groups, {
+            mode: "singleselect"
+        });
+        atlas_selector.set_activation(atlas_id, true);
+        atlas_selector.settings.on_select = change_atlas;
+
+        tool.html = null;
+        tool.type = "custom";
+        tool.tool_dom_id = tool.html_id;
+
+        return(tool);
+    }
+
+    function change_atlas(transition, item) {
+
+        var new_atlas_id = item.id;
+        var state = _page.get_state();
+        var structure = "";
+
+        if(state.structure) {
+
+            var atlases = _controller.get_atlases();
+            var cur_atlas = _controller.get_atlas();
+            var new_atlas = null;
+            for(var i = 0; i < atlases.length; i++) {
+                if(atlases[i].id == new_atlas_id) {
+                    new_atlas = atlases[i];
+                    break;
+                }
+            }
+
+            if(new_atlas) {
+                var preserve_structure = (new_atlas.structure_graph.ontology.id == cur_atlas.structure_graph.ontology.id);
+                structure = preserve_structure ? ("&structure=" + state.structure) : "";
+            }
+        }
+
+        window.location = "/atlas?atlas=" + new_atlas_id + "#atlas=" + new_atlas_id + structure;
+    }
+
+    function do_config_event(args) {
+
+        var activate = (args[0] == 'activate');
+        var tool = args[1];
+
+        switch(tool.id) {
+
+            case 'show_atlas_thumbnails':
+                do_thumbnails_opening(activate, _controller);
+                break;
+            case 'download_atlas':
+                show_download_dialog($j('#download_dialog_container'), _controller);
+                break;
+            case 'show_atlas_description':
+                _description_window.show(tool.active);
+                var controls = _user_config.get('controls');
+                controls[tool.id] = tool.active;
+                _user_config.set('controls', controls);
+                break;
+            case 'help':
+                do_help();
+                break;
+            case 'about':
+                do_about();
+                break;
+            default:
+                trace("config menu event, tool_id: " + tool.id);
+        }
+    }
+
+
+    function do_help() {
+
+        window.open('//help.brain-map.org/display/atlasviewer/Allen+Reference+Atlas+Viewer', '_help', 'status=0,toolbar=0,menubar=0,width=800,height=600,scrollbars=1');
+    }
+
+
+    function do_about() {
+
+        window.open('atlas/about', '_about', 'status=0,toolbar=0,menubar=0,width=560,height=680,scrollbars=no');
+    }
+
+
+    function do_thumbnails_opening(open, viewer) {
+
+        var _page_config = _page.get_config();
+        var _component_configs = _page_config.components;
+        var thumbnail_size = (_component_configs.image_strip ?
+                                _component_configs.image_strip.height ?
+                                    _component_configs.image_strip.height
+                                : 200
+                              : 0);
+
+        var target = open ? thumbnail_size : 1;
+        var start = target == thumbnail_size ? 1 : thumbnail_size;
+
+        $j('#page_container').css({opacity:start});
+        $j('#page_container').animate({
+                    opacity: target
+                },
+                {
+                    step: function(now, fx) {
+
+                        viewer.set_window_size('bottom', now);
+                    }
+                });
+    }
+
+
+    /**
+     * Only doing download for the image view, not the atlas view currently.
+     */
+    function show_download_dialog(container, which_view) {
+
+        var viewInfo = which_view.get_image_info();
+
+
+
+        var download_callbacks = {
+            onDownload:do_image_download,
+            onDisable:do_downsample_disable
+        };
+
+        var download_container = container;
+        container.empty();
+        var download_dialog = new downloadWidget(download_container, download_callbacks, which_view);
+        download_dialog.setTitle("Download Image");
+
+        // set downsample box
+        var width = viewInfo.image.image_width;
+        var height = viewInfo.image.image_height;
+        var tiers = viewInfo.image.tier_count;
+
+        download_dialog.setDownsampleFactor(height, width, tiers);
+
+        // set Name
+        var name = viewInfo.image.data_set_id + "_" + viewInfo.image.section_number;
+        download_dialog.setImageName(name);
+
+        do_downsample_disable();
+        download_dialog.show();
+    }
+
+    function do_downsample_disable(){
+        var type = document.getElementById("downloadType").value;
+        if(type === 'view'){
+            $j('#downsampleFactor').attr("disabled",true);
+        }
+        else{
+            $j('#downsampleFactor').attr("disabled",false);
+        }
+    }
+
+    function do_image_download(type, filename, downsample, image_view){
+
+        var viewInfo = image_view.get_image_info();
+        var path = viewInfo.image.image_path.split("&");
+        var filter_set = image_view.get_image_set().get_filter();
+        var filters = (filter_set && filter_set.filterName.length) ? ("&filter=" + filter_set.filterName + "&filterVals=" + filter_set.filterVals) : "";
+        var view = image_view.get_image_set().get_download_info();       // For downloading current image view
+        var url = null;
+
+        // translate downsample to zoom
+        var zoom = (viewInfo.image.tier_count - 1) - downsample;
+
+        if(type === "view"){
+            url = path[0] +
+                "&mime=1" +
+                "&fileout=" + filename +
+                "&zoom=" + view.image.tier +
+                "&top=" + view.image.top +
+                "&left=" + view.image.left +
+                "&width=" + view.image.width +
+                "&height=" + view.image.height +
+                filters;
+
+            window.open(url);
+        }
+        else if(type === "image"){
+            url = path[0] +
+                "&mime=1" +
+                "&fileout=" + filename +
+                "&zoom=" + zoom +
+                "&top=" + viewInfo.image.top +
+                "&left=" + viewInfo.image.left +
+                "&width=" + viewInfo.image.width/Math.pow(2,downsample) +
+                "&height=" + viewInfo.image.height/Math.pow(2,downsample) +
+                filters;
+
+            window.open(url);
+        }
+    }
+
+</script>
+
+
+</body>
+</html>
